@@ -1,0 +1,120 @@
+Implement a C program to eliminate left factoring from a given CFG.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_PRODUCTIONS 10
+#define MAX_SYMBOLS 50
+#define MAX_LENGTH 50
+
+// Structure to store a production rule
+typedef struct {
+    char lhs;                    // Left-hand side non-terminal
+    char rhs[MAX_PRODUCTIONS][MAX_LENGTH];  // Right-hand side alternatives
+    int num_rhs;                 // Number of alternatives
+} Production;
+
+// Function to print the grammar
+void printGrammar(Production grammar[], int num_non_terminals) {
+    for (int i = 0; i < num_non_terminals; i++) {
+        printf("%c -> ", grammar[i].lhs);
+        for (int j = 0; j < grammar[i].num_rhs; j++) {
+            printf("%s ", grammar[i].rhs[j]);
+            if (j != grammar[i].num_rhs - 1) {
+                printf("| ");
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Function to perform left factoring on the given grammar
+void leftFactoring(Production grammar[], int *num_non_terminals) {
+    for (int i = 0; i < *num_non_terminals; i++) {
+        // Check for common prefixes in the productions
+        for (int j = i + 1; j < *num_non_terminals; j++) {
+            if (grammar[i].lhs == grammar[j].lhs) {
+                // Check common prefix between grammar[i] and grammar[j]
+                int prefix_len = 0;
+                while (prefix_len < grammar[i].num_rhs && prefix_len < grammar[j].num_rhs &&
+                       strncmp(grammar[i].rhs[0], grammar[j].rhs[0], prefix_len) == 0) {
+                    prefix_len++;
+                }
+
+                // If there's a common prefix, we need to factor it
+                if (prefix_len > 0) {
+                    char new_non_terminal = 'A' + *num_non_terminals;  // New non-terminal
+                    grammar[*num_non_terminals].lhs = new_non_terminal;
+                    grammar[*num_non_terminals].num_rhs = 0;
+
+                    // Create the factored prefix
+                    char prefix[prefix_len + 1];
+                    strncpy(prefix, grammar[i].rhs[0], prefix_len);
+                    prefix[prefix_len] = '\0';
+
+                    // Add the new non-terminal production
+                    sprintf(grammar[*num_non_terminals].rhs[grammar[*num_non_terminals].num_rhs], "%s", prefix);
+                    grammar[*num_non_terminals].num_rhs++;
+
+                    // Modify the old productions to include the new non-terminal
+                    for (int k = 0; k < grammar[i].num_rhs; k++) {
+                        if (strncmp(grammar[i].rhs[k], prefix, prefix_len) == 0) {
+                            strcpy(grammar[i].rhs[k], grammar[i].rhs[k] + prefix_len);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int num_non_terminals;
+    Production grammar[MAX_PRODUCTIONS];
+
+    // Input the number of non-terminals
+    printf("Enter the number of non-terminals: ");
+    scanf("%d", &num_non_terminals);
+
+    // Input the grammar productions
+    for (int i = 0; i < num_non_terminals; i++) {
+        printf("Enter the non-terminal for production %d: ", i + 1);
+        getchar();  // To consume the newline character
+        scanf("%c", &grammar[i].lhs);
+        printf("Enter the number of alternatives for %c: ", grammar[i].lhs);
+        scanf("%d", &grammar[i].num_rhs);
+
+        printf("Enter the alternatives for %c:\n", grammar[i].lhs);
+        for (int j = 0; j < grammar[i].num_rhs; j++) {
+            printf("Alternative %d: ", j + 1);
+            getchar();  // To consume the newline character
+            scanf("%s", grammar[i].rhs[j]);
+        }
+    }
+
+    printf("\nOriginal Grammar:\n");
+    printGrammar(grammar, num_non_terminals);
+
+    leftFactoring(grammar, &num_non_terminals);
+
+    printf("\nGrammar After Left Factoring:\n");
+    printGrammar(grammar, num_non_terminals);
+
+    return 0;
+OUTPUT:
+Enter the number of non-terminals: 1
+Enter the non-terminal for production 1: A  
+Enter the number of alternatives for A: 2
+Enter the alternatives for A:
+Alternative 1: ab
+Alternative 2: ac
+
+Original Grammar:
+A -> ab | ac 
+
+Grammar After Left Factoring:
+A -> ab | ac 
+
+
+=== Code Execution Successful ===
+}
