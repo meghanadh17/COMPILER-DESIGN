@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+char lookahead;  // The current character in the input buffer
+
+// Function declarations for each non-terminal
+void E();
+void E_prime();
+void T();
+void T_prime();
+void F();
+
+// Function to get the next character from input and skip whitespaces
+void getNextChar() {
+    lookahead = getchar();
+    // Skip any whitespaces
+    while (isspace(lookahead)) {
+        lookahead = getchar();
+    }
+}
+
+// Function to handle errors
+void error() {
+    printf("Syntax error\n");
+    exit(1);
+}
+
+// Function to match a terminal and get the next character
+void match(char terminal) {
+    if (lookahead == terminal) {
+        getNextChar();
+    } else {
+        error();
+    }
+}
+
+// The E -> T E' rule
+void E() {
+    T();         // Process a term
+    E_prime();   // Process the continuation of the expression
+}
+
+// The E' -> + T E' | ε rule
+void E_prime() {
+    if (lookahead == '+') {
+        match('+');  // Match '+'
+        T();         // Process the next term
+        E_prime();   // Process the continuation of the expression
+    }
+    // epsilon (empty production), do nothing
+}
+
+// The T -> F T' rule
+void T() {
+    F();         // Process a factor
+    T_prime();   // Process the continuation of the term
+}
+
+// The T' -> * F T' | ε rule
+void T_prime() {
+    if (lookahead == '*') {
+        match('*');  // Match '*'
+        F();         // Process the next factor
+        T_prime();   // Process the continuation of the term
+    }
+    // epsilon (empty production), do nothing
+}
+
+// The F -> ( E ) | id rule
+void F() {
+    if (lookahead == '(') {
+        match('(');  // Match '('
+        E();         // Process the expression inside parentheses
+        match(')');   // Match ')'
+    } else if (isalnum(lookahead)) {  // Assuming an identifier is a single alphanumeric character
+        match(lookahead);  // Match the identifier (e.g., id)
+    } else {
+        error();
+    }
+}
+
+// Main function to start the parsing process
+int main() {
+    printf("Enter an expression: ");
+    getNextChar();  // Read the first character of the input
+    E();            // Start parsing from the start symbol E
+    if (lookahead == '\n' || lookahead == EOF) {
+        printf("Input is valid.\n");
+    } else {
+        error();
+    }
+    return 0;
+}
+OUTPUT:
+Enter an expression: id++
+Syntax error
+
+
+=== Code Exited With Errors ===
