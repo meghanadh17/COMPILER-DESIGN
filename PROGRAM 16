@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure to represent a three-address code instruction
+typedef struct {
+    char op[10];
+    char arg1[10];
+    char arg2[10];
+    char result[10];
+} TAC;
+
+// Function to generate three-address code
+void generateTAC(char *expr) {
+    char *token;
+    char temp[10];
+    TAC tac;
+    int i = 0;
+
+    // Tokenize the input expression
+    token = strtok(expr, " ");
+
+    while (token != NULL) {
+        // Check if the token is an operator
+        if (strcmp(token, "+") == 0 || strcmp(token, "-") == 0 ||
+            strcmp(token, "*") == 0 || strcmp(token, "/") == 0) {
+            // Generate TAC instruction
+            strcpy(tac.op, token);
+            strcpy(tac.arg1, temp);
+            token = strtok(NULL, " ");
+            strcpy(tac.arg2, token);
+            sprintf(tac.result, "T%d", i);
+            printf("%s = %s %s %s\n", tac.result, tac.arg1, tac.op, tac.arg2);
+            strcpy(temp, tac.result);
+            i++;
+        } else {
+            // Store the operand
+            strcpy(temp, token);
+        }
+
+        token = strtok(NULL, " ");
+    }
+}
+
+int main() {
+    char expr[100];
+
+    printf("Enter an arithmetic expression: ");
+    fgets(expr, sizeof(expr), stdin);
+    expr[strcspn(expr, "\n")] = 0; // Remove trailing newline
+
+    generateTAC(expr);
+
+    return 0;
+}
+
+
+OUTPUT:;
+Enter an arithmetic expression: a + b * c
+a + b * c
+
+T0 = a + b
+T1 = T0 * c
+
+
+=== Code Execution Successful ===
