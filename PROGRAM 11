@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_SYMBOLS 100
+
+// Define a structure to represent a symbol
+typedef struct {
+    char name[50];
+    char type[20];  // Data type of the symbol (e.g., int, float)
+    int address;     // Memory address (could be an offset or register)
+} Symbol;
+
+// Define a structure for the symbol table
+typedef struct {
+    Symbol symbols[MAX_SYMBOLS];
+    int count;
+} SymbolTable;
+
+// Function to initialize the symbol table
+void initSymbolTable(SymbolTable* table) {
+    table->count = 0;
+}
+
+// Function to insert a symbol into the symbol table
+int insertSymbol(SymbolTable* table, const char* name, const char* type, int address) {
+    // Check if the table is full
+    if (table->count >= MAX_SYMBOLS) {
+        printf("Symbol table is full.\n");
+        return -1; // Failure
+    }
+
+    // Check if the symbol already exists
+    for (int i = 0; i < table->count; i++) {
+        if (strcmp(table->symbols[i].name, name) == 0) {
+            printf("Symbol '%s' already exists.\n", name);
+            return -1; // Failure
+        }
+    }
+
+    // Add the symbol to the table
+    strcpy(table->symbols[table->count].name, name);
+    strcpy(table->symbols[table->count].type, type);
+    table->symbols[table->count].address = address;
+    table->count++;
+    return 0; // Success
+}
+
+// Function to search for a symbol in the symbol table
+int searchSymbol(SymbolTable* table, const char* name) {
+    for (int i = 0; i < table->count; i++) {
+        if (strcmp(table->symbols[i].name, name) == 0) {
+            printf("Symbol found: Name: %s, Type: %s, Address: %d\n",
+                   table->symbols[i].name, table->symbols[i].type, table->symbols[i].address);
+            return i; // Symbol found
+        }
+    }
+    printf("Symbol '%s' not found.\n", name);
+    return -1; // Symbol not found
+}
+
+// Function to display all symbols in the symbol table
+void displaySymbols(const SymbolTable* table) {
+    if (table->count == 0) {
+        printf("Symbol table is empty.\n");
+        return;
+    }
+    printf("Symbol Table:\n");
+    printf("Name\t\tType\t\tAddress\n");
+    for (int i = 0; i < table->count; i++) {
+        printf("%s\t\t%s\t\t%d\n", table->symbols[i].name, table->symbols[i].type, table->symbols[i].address);
+    }
+}
+
+int main() {
+    SymbolTable table;
+    initSymbolTable(&table);
+
+    // Insert some symbols into the table
+    insertSymbol(&table, "x", "int", 1001);
+    insertSymbol(&table, "y", "float", 1002);
+    insertSymbol(&table, "z", "char", 1003);
+
+    // Display all symbols
+    displaySymbols(&table);
+
+    // Search for a symbol
+    searchSymbol(&table, "y");
+    searchSymbol(&table, "a");
+
+    return 0;
+}
+OUTPUT:
+Symbol Table:
+Name		Type		Address
+x		int		1001
+y		float		1002
+z		char		1003
+Symbol found: Name: y, Type: float, Address: 1002
+Symbol 'a' not found.
+
+
+=== Code Execution Successful ===
